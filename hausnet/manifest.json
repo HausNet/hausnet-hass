@@ -1,0 +1,12 @@
+{
+  "domain": "hausnet",
+  "name": "hausnet-hub",
+  "documentation": "TBD",
+  "requirements": [
+    "aioreactive",
+    "paho-mqtt",
+    "janus"
+  ],
+  "dependencies": [],
+  "codeowners": []
+}
