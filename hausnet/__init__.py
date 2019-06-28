@@ -72,11 +72,4 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
         return False
 
     hass.data[DOMAIN] = {INTERFACES: hausnet}
-    hass.async_create_task(async_load_platform(
-        hass,
-        SWITCH_DOMAIN,
-        DOMAIN,
-        None,
-        config
-    ))
     return True
