@@ -3,9 +3,7 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.helpers import config_validation as cv, ConfigType
-from homeassistant.helpers.discovery import async_load_platform
 from homeassistant.helpers.typing import HomeAssistantType
 
 DOMAIN = 'hausnet'
