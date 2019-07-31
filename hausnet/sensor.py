@@ -1,11 +1,12 @@
-"""Support for HausNet switches."""
+"""Support for HausNet sensors."""
 import logging
 from asyncio import CancelledError
-from typing import Callable, Dict, Optional, Any
+from typing import Callable, Dict, Optional, Any, Union
 
 from hausnet.builders import DeviceInterface
 
 from homeassistant.components.switch import SwitchDevice
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import HomeAssistantType, ConfigType
 from homeassistant.const import CONF_NAME, EVENT_HOMEASSISTANT_START
 
@@ -23,7 +24,7 @@ async def async_setup_platform(
         async_add_entities: Callable,
         discovery_info: Dict
 ) -> None:
-    """Set up a switch. Called multiple times for each platform-based switch
+    """Set up a sensor. Called multiple times for each platform-based switch
     in configuration.
 
     :param hass:               HA internals
@@ -35,18 +36,19 @@ async def async_setup_platform(
     devices = []
     hausnet: HausNet = hass.data[DOMAIN][INTERFACES]
     interface = hausnet.device_interfaces[config[CONF_DEVICE_FQID]]
-    switch = HausNetSwitch(
+    sensor = HausNetSensor(
         config[CONF_DEVICE_FQID],
         interface,
         None if not config[CONF_NAME] else config[CONF_NAME]
     )
-    async_add_entities([switch])
-    _LOGGER.debug("Added HausNet switch: %s", switch.unique_id)
+    async_add_entities([sensor])
+    _LOGGER.debug("Added HausNet sensor: %s", sensor.unique_id)
 
 
 # noinspection PyAbstractClass
-class HausNetSwitch(SwitchDevice, HausNetDevice):
-    """Representation of a HausNet Switch."""
+class HausNetSensor(HausNetDevice):
+    """Representation of a HausNet Sensor."""
+
     def __init__(
         self,
         device_id: str,
@@ -55,21 +57,20 @@ class HausNetSwitch(SwitchDevice, HausNetDevice):
     ) -> None:
         """Set up the device_interface to the (real) basic switch"""
         super().__init__(device_id, device_interface, name)
-        self._is_on = False
+        self._state = None
 
     @property
-    def is_on(self) -> bool:
-        """Return true if the switch is on."""
-        return self._is_on
+    def state(self) -> Union[bool, float, int]:
+        """Return the current state."""
+        return self._state
 
-    async def async_turn_on(self, **kwargs):
-        """Send the message to turn the switch on"""
-        await self._device_interface.in_queue.put({"state": OnOffState.ON})
-
-    async def async_turn_off(self, **kwargs):
-        """Send the message to turn the switch off"""
-        await self._device_interface.in_queue.put({"state": OnOffState.OFF})
+    @property
+    def unit_of_measurement(self) -> str:
+        """Return the unit of measurement of the sensor."""
+        return self._device_interface.device.state.config.unit
 
     def update_state_from_message(self, message: Dict[str, Any]):
-        """Called by parent class when a message arrives"""
-        self._is_on = message['state'] == OnOffState.ON
+        """On receipt of a state update, the parent class calls here, then
+        updates HASS.
+        """
+        self._state = message['state']
