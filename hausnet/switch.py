@@ -1,17 +1,18 @@
 """Support for HausNet switches."""
 import logging
-from asyncio import CancelledError
 from typing import Callable, Dict, Optional, Any
 
-from hausnet.builders import DeviceInterface
-
 from homeassistant.components.switch import SwitchDevice
-from homeassistant.helpers.typing import HomeAssistantType, ConfigType
-from homeassistant.const import CONF_NAME, EVENT_HOMEASSISTANT_START
+from homeassistant.helpers.typing import (HomeAssistantType, ConfigType)
+from homeassistant.const import CONF_NAME
 
 from hausnet.hausnet import HausNet
+from hausnet.builders import DeviceInterface
 from hausnet.states import OnOffState
-from . import DOMAIN, INTERFACES, CONF_DEVICE_FQID, HausNetDevice
+# noinspection PyUnresolvedReferences
+from . import (
+    DOMAIN, INTERFACES, CONF_DEVICE_FQID, PLATFORM_SCHEMA, HausNetDevice
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -34,11 +35,17 @@ async def async_setup_platform(
     assert DOMAIN in hass.data, "HausNet domain must be defined"
     devices = []
     hausnet: HausNet = hass.data[DOMAIN][INTERFACES]
+    if CONF_DEVICE_FQID not in config:
+        _LOGGER.error("device_fqid not in config: %s", str(config))
+        return
+    elif config[CONF_DEVICE_FQID] not in hausnet.device_interfaces:
+        _LOGGER.error("Device %s no longer exists.", config[CONF_DEVICE_FQID])
+        return
     interface = hausnet.device_interfaces[config[CONF_DEVICE_FQID]]
     switch = HausNetSwitch(
         config[CONF_DEVICE_FQID],
         interface,
-        None if not config[CONF_NAME] else config[CONF_NAME]
+        config[CONF_NAME] if CONF_NAME in config else None
     )
     async_add_entities([switch])
     _LOGGER.debug("Added HausNet switch: %s", switch.unique_id)
@@ -72,4 +79,4 @@ class HausNetSwitch(SwitchDevice, HausNetDevice):
 
     def update_state_from_message(self, message: Dict[str, Any]):
         """Called by parent class when a message arrives"""
-        self._is_on = message['state'] == OnOffState.ON
+        self._is_on = self._device_interface.device.state.value == OnOffState.ON

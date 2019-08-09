@@ -1,18 +1,17 @@
 """Support for HausNet sensors."""
 import logging
-from asyncio import CancelledError
 from typing import Callable, Dict, Optional, Any, Union
 
-from hausnet.builders import DeviceInterface
-
-from homeassistant.components.switch import SwitchDevice
-from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import HomeAssistantType, ConfigType
-from homeassistant.const import CONF_NAME, EVENT_HOMEASSISTANT_START
+from homeassistant.helpers.typing import (HomeAssistantType, ConfigType)
+from homeassistant.const import CONF_NAME
 
 from hausnet.hausnet import HausNet
-from hausnet.states import OnOffState
-from . import DOMAIN, INTERFACES, CONF_DEVICE_FQID, HausNetDevice
+from hausnet.builders import DeviceInterface
+
+# noinspection PyUnresolvedReferences
+from . import (
+    DOMAIN, INTERFACES, CONF_DEVICE_FQID, PLATFORM_SCHEMA, HausNetDevice
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ async def async_setup_platform(
     sensor = HausNetSensor(
         config[CONF_DEVICE_FQID],
         interface,
-        None if not config[CONF_NAME] else config[CONF_NAME]
+        config[CONF_NAME] if CONF_NAME in config else None
     )
     async_add_entities([sensor])
     _LOGGER.debug("Added HausNet sensor: %s", sensor.unique_id)
@@ -67,10 +66,10 @@ class HausNetSensor(HausNetDevice):
     @property
     def unit_of_measurement(self) -> str:
         """Return the unit of measurement of the sensor."""
-        return self._device_interface.device.state.config.unit
+        return self._device_interface.device.state.unit
 
     def update_state_from_message(self, message: Dict[str, Any]):
         """On receipt of a state update, the parent class calls here, then
         updates HASS.
         """
-        self._state = message['state']
+        self._state = self._device_interface.device.state.value

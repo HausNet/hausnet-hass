@@ -1,12 +1,14 @@
 """Support for HausNet devices."""
 import logging
+from asyncio import CancelledError
 from typing import Optional, Any, Dict
 
 import voluptuous as vol
 from hausnet.builders import DeviceInterface
 
-from homeassistant.const import EVENT_HOMEASSISTANT_START
+from homeassistant.const import EVENT_HOMEASSISTANT_START, CONF_NAME
 from homeassistant.helpers import config_validation as cv, ConfigType
+from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.typing import HomeAssistantType
 
@@ -25,6 +27,9 @@ CONF_DEVICES = 'devices'
 CONF_DEVICE_TYPE = 'type'
 CONF_DEVICE_ID = 'device_id'
 CONF_DEVICE_FQID = 'device_fqid'
+CONF_CONFIG = 'config'
+CONF_CONFIG_STATE_TYPE = 'state.type'
+CONF_CONFIG_STATE_UNIT = 'state.unit'
 
 NOTIFICATION_ID = 'hausnet_notification'
 NOTIFICATION_TITLE = 'HausNet Component Setup'
@@ -43,12 +48,21 @@ CONFIG_SCHEMA = vol.Schema({
                     vol.Required(str): vol.Schema({
                         vol.Required(CONF_DEVICE_TYPE): cv.string,
                         vol.Required(CONF_DEVICE_ID): cv.string,
+                        vol.Optional(CONF_CONFIG): vol.Schema({
+                            vol.Optional(CONF_CONFIG_STATE_TYPE): cv.string,
+                            vol.Optional(CONF_CONFIG_STATE_UNIT): cv.string,
+                        })
                     })
                 })
             }),
         }),
     }),
 }, extra=vol.ALLOW_EXTRA)
+
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Optional(CONF_NAME): cv.string,
+    vol.Required(CONF_DEVICE_FQID): cv.string,
+})
 
 
 async def async_setup(hass: HomeAssistantType, config: ConfigType):
@@ -160,6 +174,7 @@ class HausNetDevice(Entity):
         Every derived class should handle this in its own way.
         """
         assert "Must be overridden!"
+
 
 """Later ?
     @property
