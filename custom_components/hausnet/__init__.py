@@ -7,10 +7,10 @@ import voluptuous as vol
 from hausnet.builders import DeviceInterface
 
 from homeassistant.const import EVENT_HOMEASSISTANT_START, CONF_NAME
-from homeassistant.helpers import config_validation as cv, ConfigType
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.config_validation import PLATFORM_SCHEMA
 from homeassistant.helpers.entity import Entity
-from homeassistant.helpers.typing import HomeAssistantType
+from homeassistant.helpers.typing import HomeAssistantType, ConfigType
 
 DOMAIN = 'hausnet'
 INTERFACES = 'interfaces'
@@ -72,7 +72,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
     mqtt_conf = hausnet_conf[CONF_MQTT]
     loop = hass.loop
     try:
-        hausnet = HausNet(
+        net = HausNet(
             loop,
             mqtt_conf[CONF_SERVER],
             mqtt_conf[CONF_PORT],
@@ -87,8 +87,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
             title=NOTIFICATION_TITLE,
             notification_id=NOTIFICATION_ID)
         return False
-
-    hass.data[DOMAIN] = {INTERFACES: hausnet}
+    hass.data[DOMAIN] = {INTERFACES: net}
     return True
 
 

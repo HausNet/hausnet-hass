@@ -1,0 +1,8 @@
+{
+  "domain": "hausnet",
+  "name": "HausNet Device Hub",
+  "documentation": "TBD",
+  "requirements": [ "hausnet-server" ],
+  "dependencies": [],
+  "codeowners": []
+}
