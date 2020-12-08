@@ -38,10 +38,10 @@ async def async_setup_platform(
     if CONF_DEVICE_FQID not in config:
         _LOGGER.error("device_fqid not in config: %s", str(config))
         return
-    elif config[CONF_DEVICE_FQID] not in hausnet.device_interfaces:
+    elif config[CONF_DEVICE_FQID] not in hausnet.device_assemblies():
         _LOGGER.error("Device %s no longer exists.", config[CONF_DEVICE_FQID])
         return
-    interface = hausnet.device_interfaces[config[CONF_DEVICE_FQID]]
+    interface = hausnet.device_assemblies()[config[CONF_DEVICE_FQID]]
     switch = HausNetSwitch(
         config[CONF_DEVICE_FQID],
         interface,

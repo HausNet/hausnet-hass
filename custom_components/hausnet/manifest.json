@@ -2,7 +2,7 @@
   "domain": "hausnet",
   "name": "HausNet Device Hub",
   "documentation": "TBD",
-  "requirements": [ "hausnet-server==0.0.5" ],
+  "requirements": [ "hausnet-server==0.0.6" ],
   "issue_tracker": "https://github.com/HausNet/hausnet-server/issues",
   "dependencies": [],
   "codeowners": [
