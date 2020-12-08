@@ -3,6 +3,10 @@
   "name": "HausNet Device Hub",
   "documentation": "TBD",
   "requirements": [ "hausnet-server" ],
+  "issue_tracker": "https://github.com/HausNet/hausnet-server/issues",
   "dependencies": [],
-  "codeowners": []
+  "codeowners": [
+    "@HausNet",
+    "@liber_tas"
+  ]
 }

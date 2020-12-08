@@ -6,7 +6,7 @@ from homeassistant.helpers.typing import (HomeAssistantType, ConfigType)
 from homeassistant.const import CONF_NAME
 
 from hausnet.hausnet import HausNet
-from hausnet.builders import DeviceInterface
+from hausnet.builders import DeviceAssembly
 
 # noinspection PyUnresolvedReferences
 from . import (
@@ -51,11 +51,11 @@ class HausNetSensor(HausNetDevice):
     def __init__(
         self,
         device_id: str,
-        device_interface: DeviceInterface,
+        device_assembly: DeviceAssembly,
         name: Optional[str] = None
     ) -> None:
-        """Set up the device_interface to the (real) basic switch"""
-        super().__init__(device_id, device_interface, name)
+        """Set up the device_assembly to the (real) basic switch"""
+        super().__init__(device_id, device_assembly, name)
         self._state = None
 
     @property
@@ -66,10 +66,10 @@ class HausNetSensor(HausNetDevice):
     @property
     def unit_of_measurement(self) -> str:
         """Return the unit of measurement of the sensor."""
-        return self._device_interface.device.state.unit
+        return self._device_assembly.device.state.unit
 
     def update_state_from_message(self, message: Dict[str, Any]):
         """On receipt of a state update, the parent class calls here, then
         updates HASS.
         """
-        self._state = self._device_interface.device.state.value
+        self._state = self._device_assembly.device.state.value

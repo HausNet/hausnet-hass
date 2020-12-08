@@ -2,12 +2,12 @@
 import logging
 from typing import Callable, Dict, Optional, Any
 
-from homeassistant.components.switch import SwitchDevice
+from homeassistant.components.switch import SwitchEntity
 from homeassistant.helpers.typing import (HomeAssistantType, ConfigType)
 from homeassistant.const import CONF_NAME
 
 from hausnet.hausnet import HausNet
-from hausnet.builders import DeviceInterface
+from hausnet.builders import DeviceAssembly
 from hausnet.states import OnOffState
 # noinspection PyUnresolvedReferences
 from . import (
@@ -52,16 +52,16 @@ async def async_setup_platform(
 
 
 # noinspection PyAbstractClass
-class HausNetSwitch(SwitchDevice, HausNetDevice):
+class HausNetSwitch(SwitchEntity, HausNetDevice):
     """Representation of a HausNet Switch."""
     def __init__(
         self,
         device_id: str,
-        device_interface: DeviceInterface,
+        device_assembly: DeviceAssembly,
         name: Optional[str] = None
     ) -> None:
-        """Set up the device_interface to the (real) basic switch"""
-        super().__init__(device_id, device_interface, name)
+        """Set up the device_assembly to the (real) basic switch"""
+        super().__init__(device_id, device_assembly, name)
         self._is_on = False
 
     @property
@@ -71,12 +71,12 @@ class HausNetSwitch(SwitchDevice, HausNetDevice):
 
     async def async_turn_on(self, **kwargs):
         """Send the message to turn the switch on"""
-        await self._device_interface.in_queue.put({"state": OnOffState.ON})
+        await self._device_assembly.in_queue.put({"state": OnOffState.ON})
 
     async def async_turn_off(self, **kwargs):
         """Send the message to turn the switch off"""
-        await self._device_interface.in_queue.put({"state": OnOffState.OFF})
+        await self._device_assembly.in_queue.put({"state": OnOffState.OFF})
 
     def update_state_from_message(self, message: Dict[str, Any]):
         """Called by parent class when a message arrives"""
-        self._is_on = self._device_interface.device.state.value == OnOffState.ON
+        self._is_on = self._device_assembly.device.state.value == OnOffState.ON

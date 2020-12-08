@@ -4,7 +4,7 @@ from asyncio import CancelledError
 from typing import Optional, Any, Dict
 
 import voluptuous as vol
-from hausnet.builders import DeviceInterface
+from hausnet.builders import DeviceAssembly
 
 from homeassistant.const import EVENT_HOMEASSISTANT_START, CONF_NAME
 from homeassistant.helpers import config_validation as cv
@@ -97,12 +97,12 @@ class HausNetDevice(Entity):
     def __init__(
         self,
         device_id: str,
-        device_interface: DeviceInterface,
+        device_assembly: DeviceAssembly,
         name: Optional[str] = None
     ):
         self._unique_id = device_id
         self._name = name
-        self._device_interface = device_interface
+        self._device_assembly = device_assembly
         self._available = True
         self._read_task = None
 
@@ -151,8 +151,8 @@ class HausNetDevice(Entity):
         while True:
             # noinspection PyBroadException
             try:
-                message = await self._device_interface.out_queue.get()
-                self._device_interface.out_queue.task_done()
+                message = await self._device_assembly.out_queue.get()
+                self._device_assembly.out_queue.task_done()
                 _LOGGER.debug(
                     "Got message for device %s: %s",
                     self.unique_id,
@@ -173,26 +173,3 @@ class HausNetDevice(Entity):
         Every derived class should handle this in its own way.
         """
         assert "Must be overridden!"
-
-
-"""Later ?
-    @property
-    def device_info(self):
-        #Return a device description for device registry.
-        if (self.unique_id is None or
-                self._device.uniqueid.count(':') != 7):
-            return None
-
-        serial = self._device.uniqueid.split('-', 1)[0]
-        bridgeid = self.gateway.api.config.bridgeid
-
-        return {
-            'connections': {(CONNECTION_ZIGBEE, serial)},
-            'identifiers': {(DECONZ_DOMAIN, serial)},
-            'manufacturer': self._device.manufacturer,
-            'model': self._device.modelid,
-            'name': self._device.name,
-            'sw_version': self._device.swversion,
-            'via_device': (DECONZ_DOMAIN, bridgeid),
-        }
-"""
