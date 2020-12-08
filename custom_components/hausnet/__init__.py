@@ -142,7 +142,7 @@ class HausNetDevice(Entity):
         self._read_task.stop()
         self._read_task = None
 
-    async def start_reading_device_data(self):
+    def start_reading_device_data(self):
         """Creates an async task to read data from the device's output queue,"""
         self._read_task = self.hass.async_create_task(self.read_device_data())
 
