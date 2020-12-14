@@ -33,6 +33,7 @@ async def async_setup_platform(
     """
     assert DOMAIN in hass.data, "HausNet domain must be defined"
     devices = []
+    _LOGGER.debug("Adding HausNet sensor...")
     hausnet: HausNet = hass.data[DOMAIN][INTERFACES]
     interface = hausnet.device_assemblies()[config[CONF_DEVICE_FQID]]
     sensor = HausNetSensor(

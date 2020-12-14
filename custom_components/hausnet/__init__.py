@@ -78,6 +78,7 @@ async def async_setup(hass: HomeAssistantType, config: ConfigType):
             mqtt_conf[CONF_PORT],
             hausnet_conf[CONF_DEVICES]
         )
+        net.start()
     except Exception as ex:
         _LOGGER.error("Unable to initialize HausNet: %s", str(ex))
         hass.components.persistent_notification.create(
@@ -102,7 +103,7 @@ class HausNetDevice(Entity):
     ):
         self._unique_id = device_id
         self._name = name
-        self._device_assembly = device_assembly
+        self._device_assembly: DeviceAssembly = device_assembly
         self._available = True
         self._read_task = None
 
@@ -127,8 +128,8 @@ class HausNetDevice(Entity):
         return self._available
 
     async def async_added_to_hass(self):
-        """Create a task to kick off reading device updates, _after_ HASS
-        has started
+        """ Create a task to kick off reading device updates, _after_ HASS
+            has started.
         """
         self.hass.bus.async_listen(
             EVENT_HOMEASSISTANT_START,
@@ -151,8 +152,8 @@ class HausNetDevice(Entity):
         while True:
             # noinspection PyBroadException
             try:
-                message = await self._device_assembly.out_queue.get()
-                self._device_assembly.out_queue.task_done()
+                message = await self._device_assembly.client_out_queue.get()
+                self._device_assembly.client_out_queue.task_done()
                 _LOGGER.debug(
                     "Got message for device %s: %s",
                     self.unique_id,
